@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"github.com/osrg/gobgp/packet/bgp"
@@ -28,6 +29,8 @@ func (c *Client) ReadBGPUpdate(direction int, ch chan *bgp.BGPUpdate) error {
 	case Import:
 		log.Printf("Start capturing incoming BGP updates to %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
 		filter = fmt.Sprintf("tcp and port 179 and src %s", neighbor.Config.NeighborAddress)
+	default:
+		return errors.New("Unknown direction")
 	}
 
 	handle, err := pcap.OpenLive(iface, 1600, false, pcap.BlockForever)
