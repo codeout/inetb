@@ -43,7 +43,7 @@ func New(port string) *Client {
 func (c *Client) Init(mrtPath string) error {
 	c.Host = "127.0.0.1"
 
-	if err := reset(c, true); err != nil {
+	if err := c.Reset(); err != nil {
 		return err
 	}
 

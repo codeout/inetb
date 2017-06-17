@@ -21,18 +21,14 @@ func (c *Client) Neighbor() (*config.Neighbor, error) {
 	return c.neighbor, nil
 }
 
-func (c *Client) Reset(hard ...bool) error {
+func (c *Client) Reset() error {
 	neighbor, err := c.Neighbor()
 	if err != nil {
 		return err
 	}
 
-	if len(hard) > 0 && hard[0] {
-		c.Log("Clear neighbor on %s")
-		c.GobgpClient.ResetNeighbor(neighbor.Config.NeighborAddress, "Hi!")
-	} else {
-		c.GobgpClient.SoftReset(neighbor.Config.NeighborAddress, bgp.RouteFamily(0))
-	}
+	c.Log("Clear neighbor on %s")
+	c.GobgpClient.ResetNeighbor(neighbor.Config.NeighborAddress, "Hi!")
 
 	return nil
 }
