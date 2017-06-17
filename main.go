@@ -6,8 +6,29 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
+	"github.com/osrg/gobgp/packet/bgp"
 	cli "github.com/osrg/gobgp/client"
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcap"
 )
+
+
+const (
+	Import = 1
+	Export = 2
+)
+
+type Report struct {
+	Time     string `json:"time"`
+	Sent     int    `json:"sent"`
+	Received int    `json:"received"`
+}
+
+func (r Report) String() string {
+	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
+}
 
 
 func newClient(port string) *cli.Client {
@@ -68,12 +89,64 @@ func initServer(client *cli.Client, mrtPath string) error {
 }
 
 
+func readBGPUpdate(client *cli.Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
+	neighbor, err := getNeighbor(client)
+	if err != nil {
+		return err
+	}
+
+	var filter string
+	switch direction {
+	case Export:
+		log.Printf("Start capturing outgoing BGP updates from %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
+		filter = fmt.Sprintf("tcp and port 179 and dst %s", neighbor.Config.NeighborAddress)
+	case Import:
+		log.Printf("Start capturing incoming BGP updates to %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
+		filter = fmt.Sprintf("tcp and port 179 and src %s", neighbor.Config.NeighborAddress)
+	}
+
+	handle, err := pcap.OpenLive(iface, 1600, false, pcap.BlockForever)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer handle.Close()
+
+	if err = handle.SetBPFFilter(filter); err != nil {
+		log.Fatal(err)
+	}
+
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	for packet := range packetSource.Packets() {
+		tcpLayer := packet.Layer(layers.LayerTypeTCP)
+
+		if tcpLayer != nil {
+			tcp, ok := tcpLayer.(*layers.TCP)
+			if !ok {
+				continue
+			}
+
+			msg, err := bgp.ParseBGPMessage(tcp.Payload)
+			if err != nil {
+				continue
+			}
+
+			if msg.Header.Type == bgp.BGP_MSG_UPDATE {
+				ch <- msg.Body.(*bgp.BGPUpdate)
+			}
+		}
+	}
+
+	return nil
+}
+
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	var (
-		port1 = flag.String("p1", "50051", "Port number gobgp1 is listening on")
-		port2 = flag.String("p2", "50052", "Port number gobgp2 is listening on")
+		port1 = flag.String("p1", "50051", "Port number which gobgp1 is listening on")
+		port2 = flag.String("p2", "50052", "Port number which gobgp2 is listening on")
+		iface1 = flag.String("i1", "eth0", "Interface name which gobgp1 is listening on")
+		iface2 = flag.String("i2", "eth1", "Interface name which gobgp2 is listening on")
 		wg sync.WaitGroup
 	)
 
@@ -99,6 +172,14 @@ func main() {
 	}
 	wg.Wait()
 
+	exportCh := make(chan *bgp.BGPUpdate)
+	importCh := make(chan *bgp.BGPUpdate)
+	go readBGPUpdate(client1, *iface1, Export, exportCh)
+	go readBGPUpdate(client2, *iface2, Import, importCh)
+
+
+	log.Print("Start benchmarking - Send BGP Update from client1")
+
 	if err := deprefExport(client1); err != nil {
 		log.Fatal(err)
 	}
@@ -106,5 +187,45 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Print("Start benchmarking")
+	reports := make([]*Report, 600)
+	sent := 0
+	received := 0
+
+	for tick:=0; tick < 5; tick++ {
+		func() {
+			for {
+				select {
+				case bgp := <- exportCh:
+					sent += len(bgp.NLRI)
+					tick = 0
+				default:
+					return
+				}
+			}
+		}()
+
+		func() {
+			for {
+				select {
+				case bgp := <- importCh:
+					received += len(bgp.NLRI)
+					tick = 0
+				default:
+					return
+				}
+			}
+		}()
+
+		report := &Report{
+			Time: time.Now().Format("15:04:05"),
+			Sent: sent,
+			Received: received,
+		}
+
+		log.Print(report.String())
+		reports = append(reports, report)
+		time.Sleep(time.Second)
+	}
+
+	log.Print("Stop benchmarking - Send BGP Update from client1")
 }
