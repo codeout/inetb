@@ -3,92 +3,91 @@ package main
 import (
 	"log"
 	"strconv"
-	cli "github.com/osrg/gobgp/client"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/table"
 )
 
 
-func rejectImport(client *cli.Client) error {
-	assignment, err := client.GetRouteServerImportPolicy("")
+func (c *Client) RejectImport() error {
+	assignment, err := c.GobgpClient.GetRouteServerImportPolicy("")
 	if err != nil {
 		return err
 	}
 
 	assignment.Default = table.ROUTE_TYPE_REJECT
-	if err = client.ReplacePolicyAssignment(assignment); err != nil {
+	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
 		return err
 	}
 
-	if err := softReset(client); err != nil {
+	if err := c.SoftReset(); err != nil {
 		log.Fatal(err)
 	}
 
-	logWithServer(client, "Import policy for %s is set to \"reject\"")
+	c.Log("Import policy for %s is set to \"reject\"")
 	return nil
 }
 
-func rejectExport(client *cli.Client) error {
-	assignment, err := client.GetRouteServerExportPolicy("")
+func (c *Client) RejectExport() error {
+	assignment, err := c.GobgpClient.GetRouteServerExportPolicy("")
 	if err != nil {
 		return err
 	}
 
 	assignment.Default = table.ROUTE_TYPE_REJECT
-	if err = client.ReplacePolicyAssignment(assignment); err != nil {
+	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
 		return err
 	}
 
-	if err := softReset(client); err != nil {
+	if err := c.SoftReset(); err != nil {
 		log.Fatal(err)
 	}
 
-	logWithServer(client, "Export policy for %s is set to \"reject\"")
+	c.Log("Export policy for %s is set to \"reject\"")
 	return nil
 }
 
-func acceptImport(client *cli.Client) error {
-	assignment, err := client.GetRouteServerImportPolicy("")
+func (c *Client) AcceptImport() error {
+	assignment, err := c.GobgpClient.GetRouteServerImportPolicy("")
 	if err != nil {
 		return err
 	}
 
 	assignment.Default = table.ROUTE_TYPE_ACCEPT
-	if err = client.ReplacePolicyAssignment(assignment); err != nil {
+	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
 		return err
 	}
 
-	if err := softReset(client); err != nil {
+	if err := c.SoftReset(); err != nil {
 		log.Fatal(err)
 	}
 
-	logWithServer(client, "Import policy for %s is set to \"accept\"")
+	c.Log("Import policy for %s is set to \"accept\"")
 	return nil
 }
 
-func acceptExport(client *cli.Client) error {
-	assignment, err := client.GetRouteServerExportPolicy("")
+func (c *Client) AcceptExport() error {
+	assignment, err := c.GobgpClient.GetRouteServerExportPolicy("")
 	if err != nil {
 		return err
 	}
 
 	assignment.Default = table.ROUTE_TYPE_ACCEPT
-	if err = client.ReplacePolicyAssignment(assignment); err != nil {
+	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
 		return err
 	}
 
-	if err := softReset(client); err != nil {
+	if err := c.SoftReset(); err != nil {
 		log.Fatal(err)
 	}
 
-	logWithServer(client, "Export policy for %s is set to \"accept\"")
+	c.Log("Export policy for %s is set to \"accept\"")
 	return nil
 }
 
-func deprefExport(client *cli.Client) error {
+func (c *Client) DeprefExport() error {
 	name := "depref"
 
-	policies, err := client.GetPolicy()
+	policies, err := c.GobgpClient.GetPolicy()
 	if err != nil {
 		return err
 	}
@@ -101,7 +100,7 @@ func deprefExport(client *cli.Client) error {
 	}
 
 	if !found {
-		server, err := client.GetServer()
+		server, err := c.GobgpClient.GetServer()
 		if err != nil {
 			return err
 		}
@@ -126,7 +125,7 @@ func deprefExport(client *cli.Client) error {
 			return err
 		}
 
-		client.AddPolicy(policy, true)
+		c.GobgpClient.AddPolicy(policy, true)
 
 		assign := &table.PolicyAssignment{
 			Name: "",
@@ -135,11 +134,11 @@ func deprefExport(client *cli.Client) error {
 				&table.Policy{Name:name},
 			},
 		}
-		if err = client.ReplacePolicyAssignment(assign); err != nil {
+		if err = c.GobgpClient.ReplacePolicyAssignment(assign); err != nil {
 			return err
 		}
 	}
 
-	logWithServer(client, "Depref exporting routes on %s")
+	c.Log("Depref exporting routes on %s")
 	return nil
 }

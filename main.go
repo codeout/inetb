@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"flag"
 	"log"
-	"net"
 	"sync"
 	"time"
 	"github.com/osrg/gobgp/packet/bgp"
-	cli "github.com/osrg/gobgp/client"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -31,66 +29,8 @@ func (r Report) String() string {
 }
 
 
-func newClient(port string) *cli.Client {
-	target := net.JoinHostPort("127.0.0.1", port)
-	client, err := cli.New(target)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return client
-}
-
-func serverInfo(client *cli.Client) (string, error) {
-	server, err := client.GetServer()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%s:%d", server.Config.RouterId, server.Config.Port), nil
-}
-
-func logWithServer(client *cli.Client, message string) error {
-	info, err := serverInfo(client)
-	if err != nil {
-		return err
-	}
-
-	log.Print(fmt.Sprintf(message, info))
-	return nil
-}
-
-func initServer(client *cli.Client, mrtPath string) error {
-	if err := reset(client, true); err != nil {
-		return err
-	}
-
-	if err := waitForNeighbor(client); err != nil {
-		return err
-	}
-
-	if err := acceptImport(client); err != nil {
-		return err
-	}
-
-	if err := rejectExport(client); err != nil {
-		return err
-	}
-
-	injectMrt(client, mrtPath, -1, 0, true)
-	logWithServer(client, "Routes have been loaded on %s")
-
-	if err := rejectImport(client); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-
-func readBGPUpdate(client *cli.Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
-	neighbor, err := getNeighbor(client)
+func readBGPUpdate(client *Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
+	neighbor, err := client.Neighbor()
 	if err != nil {
 		return err
 	}
@@ -159,11 +99,11 @@ func main() {
 	client1 := newClient(*port1)
 	client2 := newClient(*port2)
 
-	for _, client := range []*cli.Client{client1, client2} {
+	for _, client := range []*Client{client1, client2} {
 		wg.Add(1)
 
-		go func(client *cli.Client) {
-			if err := initServer(client, mrtPath); err != nil {
+		go func(client *Client) {
+			if err := client.Init(mrtPath); err != nil {
 				log.Fatal(err)
 			}
 
@@ -180,10 +120,10 @@ func main() {
 
 	log.Print("Start benchmarking - Send BGP Update from client1")
 
-	if err := deprefExport(client1); err != nil {
+	if err := client1.DeprefExport(); err != nil {
 		log.Fatal(err)
 	}
-	if err := acceptExport(client1); err != nil {
+	if err := client1.AcceptExport(); err != nil {
 		log.Fatal(err)
 	}
 

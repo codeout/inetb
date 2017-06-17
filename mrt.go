@@ -1,5 +1,3 @@
-// Ported from github.com/osrg/gobgp/gobgp/cmd/mrt.go
-
 package main
 
 import (
@@ -8,23 +6,29 @@ import (
 	"log"
 	"os"
 	"time"
-
-	cli "github.com/osrg/gobgp/client"
 	"github.com/osrg/gobgp/packet/mrt"
 	"github.com/osrg/gobgp/table"
 )
 
 
-func printError(err error) {
-	log.Print(err)
-}
+func (c *Client) injectMrt(filename string, count int, skip int, onlyBest bool) error {
+	// Hack
+	client := c.GobgpClient
+	globalOpts := struct {
+		Debug bool
+	}{}
 
-func exitWithError(err error) {
-	log.Fatal(err)
-}
+	printError := func(err error) {
+		log.Print(err)
+	}
 
-func injectMrt(client *cli.Client, filename string, count int, skip int, onlyBest bool) error {
+	exitWithError := func(err error) {
+		log.Fatal(err)
+	}
 
+
+	// Ported from github.com/osrg/gobgp/gobgp/cmd/mrt.go
+	// 
 	file, err := os.Open(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %s", err)
@@ -65,6 +69,10 @@ func injectMrt(client *cli.Client, filename string, count int, skip int, onlyBes
 				continue
 			}
 
+			if globalOpts.Debug {
+				fmt.Println(msg)
+			}
+			
 			if msg.Header.Type == mrt.TABLE_DUMPv2 {
 				subType := mrt.MRTSubTypeTableDumpv2(msg.Header.SubType)
 				switch subType {
