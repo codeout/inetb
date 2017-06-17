@@ -1,6 +1,8 @@
 package client
 
 import (
+	"fmt"
+	"errors"
 	"log"
 	"strconv"
 	"github.com/osrg/gobgp/config"
@@ -9,70 +11,53 @@ import (
 
 
 func (c *Client) RejectImport() error {
-	assignment, err := c.GobgpClient.GetRouteServerImportPolicy("")
-	if err != nil {
-		return err
-	}
-
-	assignment.Default = table.ROUTE_TYPE_REJECT
-	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
-		return err
-	}
-
-	if err := c.SoftReset(); err != nil {
-		log.Fatal(err)
-	}
-
-	c.Log("Import policy for %s is set to \"reject\"")
-	return nil
+	return c.modifyPolicy(Import, table.ROUTE_TYPE_REJECT)
 }
 
 func (c *Client) RejectExport() error {
-	assignment, err := c.GobgpClient.GetRouteServerExportPolicy("")
-	if err != nil {
-		return err
-	}
-
-	assignment.Default = table.ROUTE_TYPE_REJECT
-	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
-		return err
-	}
-
-	if err := c.SoftReset(); err != nil {
-		log.Fatal(err)
-	}
-
-	c.Log("Export policy for %s is set to \"reject\"")
-	return nil
+	return c.modifyPolicy(Export, table.ROUTE_TYPE_REJECT)
 }
 
 func (c *Client) AcceptImport() error {
-	assignment, err := c.GobgpClient.GetRouteServerImportPolicy("")
-	if err != nil {
-		return err
-	}
-
-	assignment.Default = table.ROUTE_TYPE_ACCEPT
-	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
-		return err
-	}
-
-	if err := c.SoftReset(); err != nil {
-		log.Fatal(err)
-	}
-
-	c.Log("Import policy for %s is set to \"accept\"")
-	return nil
+	return c.modifyPolicy(Import, table.ROUTE_TYPE_ACCEPT)
 }
 
 func (c *Client) AcceptExport() error {
-	assignment, err := c.GobgpClient.GetRouteServerExportPolicy("")
+	return c.modifyPolicy(Import, table.ROUTE_TYPE_ACCEPT)
+}
+
+func (c *Client) modifyPolicy(direction int, policy table.RouteType) error {
+	var assignment *table.PolicyAssignment
+	var err error
+	var directionText, policyText string
+
+	switch direction {
+	case Import:
+		assignment, err = c.GobgpClient.GetRouteServerImportPolicy("")
+		directionText = "Import"
+	case Export:
+		assignment, err = c.GobgpClient.GetRouteServerExportPolicy("")
+		directionText = "Export"
+	default:
+		return errors.New("Unknown direction")
+	}
+
 	if err != nil {
 		return err
 	}
 
-	assignment.Default = table.ROUTE_TYPE_ACCEPT
-	if err = c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
+	switch policy {
+	case table.ROUTE_TYPE_REJECT:
+		assignment.Default = policy
+		policyText = "reject"
+	case table.ROUTE_TYPE_ACCEPT:
+		assignment.Default = policy
+		policyText = "accept"
+	default:
+		return errors.New("Unknown policy")
+	}
+
+	if err := c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
 		return err
 	}
 
@@ -80,7 +65,7 @@ func (c *Client) AcceptExport() error {
 		log.Fatal(err)
 	}
 
-	c.Log("Export policy for %s is set to \"accept\"")
+	c.Log(fmt.Sprintf("%s policy for %%s is set to \"%s\"", directionText, policyText))
 	return nil
 }
 
