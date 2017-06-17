@@ -87,7 +87,7 @@ func (c *Client) DeprefExport() error {
 		policy, err := table.NewPolicy(config.PolicyDefinition{
 			Name: name,
 			Statements: []config.Statement{
-				config.Statement{
+				{
 					Actions: config.Actions{
 						BgpActions: config.BgpActions{
 							SetAsPathPrepend: config.SetAsPathPrepend{
@@ -110,7 +110,7 @@ func (c *Client) DeprefExport() error {
 			Name: "",
 			Type: table.POLICY_DIRECTION_EXPORT,
 			Policies: []*table.Policy{
-				&table.Policy{Name: name},
+				{Name: name},
 			},
 		}
 		if err = c.GobgpClient.ReplacePolicyAssignment(assign); err != nil {
