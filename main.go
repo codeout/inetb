@@ -92,7 +92,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	go readBGPUpdate(client2, Import, importCh)
 
 
-	log.Print("Start benchmarking - Send BGP Update from client1")
+	log.Print("Start benchmarking - Advertise new routes from client1")
 
 	if err := client1.DeprefExport(); err != nil {
 		log.Fatal(err)
@@ -142,7 +142,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		time.Sleep(time.Second)
 	}
 
-	log.Print("Stop benchmarking - Send BGP Update from client1")
+	log.Print("Stop benchmarking - Advertise new routes from client1")
 }
 
 func main() {
