@@ -10,9 +10,10 @@ import (
 )
 
 
+type Direction int
 const (
-	Import = 1
-	Export = 2
+	Import Direction = iota
+	Export
 )
 
 

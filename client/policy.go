@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"errors"
 	"log"
 	"strconv"
 	"github.com/osrg/gobgp/config"
@@ -26,7 +25,7 @@ func (c *Client) AcceptExport() error {
 	return c.modifyPolicy(Import, table.ROUTE_TYPE_ACCEPT)
 }
 
-func (c *Client) modifyPolicy(direction int, policy table.RouteType) error {
+func (c *Client) modifyPolicy(direction Direction, policy table.RouteType) error {
 	var assignment *table.PolicyAssignment
 	var err error
 	var directionText, policyText string
@@ -38,8 +37,6 @@ func (c *Client) modifyPolicy(direction int, policy table.RouteType) error {
 	case Export:
 		assignment, err = c.GobgpClient.GetRouteServerExportPolicy("")
 		directionText = "Export"
-	default:
-		return errors.New("Unknown direction")
 	}
 
 	if err != nil {
@@ -53,8 +50,6 @@ func (c *Client) modifyPolicy(direction int, policy table.RouteType) error {
 	case table.ROUTE_TYPE_ACCEPT:
 		assignment.Default = policy
 		policyText = "accept"
-	default:
-		return errors.New("Unknown policy")
 	}
 
 	if err := c.GobgpClient.ReplacePolicyAssignment(assignment); err != nil {
