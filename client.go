@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	cli "github.com/osrg/gobgp/client"
@@ -76,5 +77,5 @@ func (c *Client) RouterId() (string, error) {
 
 func (c *Client) Log(message string) {
 	routerId, _ := c.RouterId()
-	log.Printf(message, routerId)
+	log.Printf(message, fmt.Sprintf("router(%s)", routerId))
 }
