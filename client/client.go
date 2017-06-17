@@ -61,6 +61,11 @@ func (c *Client) Init(mrtPath string) error {
 	return nil
 }
 
+func (c *Client) Log(message string) {
+	routerId, _ := c.RouterId()
+	log.Printf(message, fmt.Sprintf("router(%s)", routerId))
+}
+
 func (c *Client) RouterId() (string, error) {
 	if c.routerId != "" {
 		return c.routerId, nil
@@ -73,9 +78,4 @@ func (c *Client) RouterId() (string, error) {
 	}
 
 	return c.routerId, nil
-}
-
-func (c *Client) Log(message string) {
-	routerId, _ := c.RouterId()
-	log.Printf(message, fmt.Sprintf("router(%s)", routerId))
 }
