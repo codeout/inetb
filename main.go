@@ -85,37 +85,7 @@ func readBGPUpdate(client *client.Client, direction int, ch chan *bgp.BGPUpdate)
 	return nil
 }
 
-func main() {
-	log.SetFlags(log.Ldate | log.Ltime)
-
-	var (
-		port1 = flag.String("p1", "50051", "Port number which gobgp1 is listening on")
-		port2 = flag.String("p2", "50052", "Port number which gobgp2 is listening on")
-		wg sync.WaitGroup
-	)
-
-	flag.Parse()
-	if flag.NArg() == 0 {
-		log.Fatal("MRT Table Dump file is required")
-	}
-
-	mrtPath := flag.Arg(0)
-	client1 := client.New(*port1)
-	client2 := client.New(*port2)
-
-	for _, c := range []*client.Client{client1, client2} {
-		wg.Add(1)
-
-		go func(c *client.Client) {
-			if err := c.Init(mrtPath); err != nil {
-				log.Fatal(err)
-			}
-
-			wg.Done()
-		}(c)
-	}
-	wg.Wait()
-
+func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	exportCh := make(chan *bgp.BGPUpdate)
 	importCh := make(chan *bgp.BGPUpdate)
 	go readBGPUpdate(client1, Export, exportCh)
@@ -173,4 +143,38 @@ func main() {
 	}
 
 	log.Print("Stop benchmarking - Send BGP Update from client1")
+}
+
+func main() {
+	log.SetFlags(log.Ldate | log.Ltime)
+
+	var (
+		port1 = flag.String("p1", "50051", "Port number which gobgp1 is listening on")
+		port2 = flag.String("p2", "50052", "Port number which gobgp2 is listening on")
+		wg sync.WaitGroup
+	)
+
+	flag.Parse()
+	if flag.NArg() == 0 {
+		log.Fatal("MRT Table Dump file is required")
+	}
+
+	mrtPath := flag.Arg(0)
+	client1 := client.New(*port1)
+	client2 := client.New(*port2)
+
+	for _, c := range []*client.Client{client1, client2} {
+		wg.Add(1)
+
+		go func(c *client.Client) {
+			if err := c.Init(mrtPath); err != nil {
+				log.Fatal(err)
+			}
+
+			wg.Done()
+		}(c)
+	}
+	wg.Wait()
+
+	advertiseNewRoutes(client1, client2)
 }
