@@ -2,13 +2,12 @@ package client
 
 import (
 	"fmt"
-	"log"
-	"github.com/osrg/gobgp/packet/bgp"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/osrg/gobgp/packet/bgp"
+	"log"
 )
-
 
 func (c *Client) ReadBGPUpdate(direction Direction, ch chan *bgp.BGPUpdate) error {
 	neighbor, err := c.Neighbor()

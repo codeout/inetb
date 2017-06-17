@@ -1,11 +1,10 @@
 package client
 
 import (
-	"time"
-	"github.com/osrg/gobgp/packet/bgp"
 	"github.com/osrg/gobgp/config"
+	"github.com/osrg/gobgp/packet/bgp"
+	"time"
 )
-
 
 func (c *Client) Neighbor() (*config.Neighbor, error) {
 	if c.neighbor != nil {

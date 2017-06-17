@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -10,7 +10,6 @@ import (
 	"./client"
 	"github.com/osrg/gobgp/packet/bgp"
 )
-
 
 type Report struct {
 	Time     string `json:"time"`
@@ -21,7 +20,6 @@ type Report struct {
 func (r Report) String() string {
 	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
 }
-
 
 func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	exportCh := make(chan *bgp.BGPUpdate)
@@ -43,11 +41,11 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	received := 0
 	timeout := 5
 
-	for tick:=0; tick < timeout; tick++ {
+	for tick := 0; tick < timeout; tick++ {
 		func() {
 			for {
 				select {
-				case bgp := <- exportCh:
+				case bgp := <-exportCh:
 					sent += len(bgp.NLRI)
 					tick = 0
 				default:
@@ -59,7 +57,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case bgp := <- importCh:
+				case bgp := <-importCh:
 					received += len(bgp.NLRI)
 					tick = 0
 				default:
@@ -69,8 +67,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		}()
 
 		report := &Report{
-			Time: time.Now().Format("15:04:05"),
-			Sent: sent,
+			Time:     time.Now().Format("15:04:05"),
+			Sent:     sent,
 			Received: received,
 		}
 
@@ -82,14 +80,13 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	log.Print("Stop benchmarking - Advertise new routes from client1")
 }
 
-
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	var (
 		port1 = flag.String("p1", "50051", "Port number which gobgp1 is listening on")
 		port2 = flag.String("p2", "50052", "Port number which gobgp2 is listening on")
-		wg sync.WaitGroup
+		wg    sync.WaitGroup
 	)
 
 	flag.Parse()

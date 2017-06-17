@@ -3,29 +3,27 @@ package client
 import (
 	"errors"
 	"fmt"
-	"log"
-	"net"
 	cli "github.com/osrg/gobgp/client"
 	"github.com/osrg/gobgp/config"
+	"log"
+	"net"
 )
 
-
 type Direction int
+
 const (
 	Import Direction = iota
 	Export
 )
 
-
 type Client struct {
-	Host string
-	Port string
-	GobgpClient *cli.Client
-	neighbor *config.Neighbor
-	routerId string
+	Host          string
+	Port          string
+	GobgpClient   *cli.Client
+	neighbor      *config.Neighbor
+	routerId      string
 	peerInterface string
 }
-
 
 func New(port string) *Client {
 	client, err := cli.New(net.JoinHostPort("127.0.0.1", port))
@@ -35,11 +33,10 @@ func New(port string) *Client {
 	}
 
 	return &Client{
-		Port: port,
+		Port:        port,
 		GobgpClient: client,
 	}
 }
-
 
 func (c *Client) Init(mrtPath string) error {
 	c.Host = "127.0.0.1"

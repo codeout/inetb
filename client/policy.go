@@ -2,12 +2,11 @@ package client
 
 import (
 	"fmt"
-	"log"
-	"strconv"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/table"
+	"log"
+	"strconv"
 )
-
 
 func (c *Client) RejectImport() error {
 	return c.modifyPolicy(Import, table.ROUTE_TYPE_REJECT)
@@ -84,7 +83,7 @@ func (c *Client) DeprefExport() error {
 		if err != nil {
 			return err
 		}
-		
+
 		policy, err := table.NewPolicy(config.PolicyDefinition{
 			Name: name,
 			Statements: []config.Statement{
@@ -93,7 +92,7 @@ func (c *Client) DeprefExport() error {
 						BgpActions: config.BgpActions{
 							SetAsPathPrepend: config.SetAsPathPrepend{
 								RepeatN: 1,
-								As: strconv.FormatUint(uint64(server.Config.As), 10),
+								As:      strconv.FormatUint(uint64(server.Config.As), 10),
 							},
 							SetNextHop: "self",
 						},
@@ -111,7 +110,7 @@ func (c *Client) DeprefExport() error {
 			Name: "",
 			Type: table.POLICY_DIRECTION_EXPORT,
 			Policies: []*table.Policy{
-				&table.Policy{Name:name},
+				&table.Policy{Name: name},
 			},
 		}
 		if err = c.GobgpClient.ReplacePolicyAssignment(assign); err != nil {
