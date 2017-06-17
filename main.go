@@ -145,6 +145,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	log.Print("Stop benchmarking - Advertise new routes from client1")
 }
 
+
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
 
