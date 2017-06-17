@@ -132,8 +132,9 @@ func main() {
 	reports := make([]*Report, 600)
 	sent := 0
 	received := 0
+	timeout := 5
 
-	for tick:=0; tick < 5; tick++ {
+	for tick:=0; tick < timeout; tick++ {
 		func() {
 			for {
 				select {
