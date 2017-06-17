@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -15,6 +16,7 @@ type Client struct {
 	GobgpClient *cli.Client
 	neighbor *config.Neighbor
 	routerId string
+	peerInterface string
 }
 
 
@@ -78,4 +80,39 @@ func (c *Client) RouterId() (string, error) {
 	}
 
 	return c.routerId, nil
+}
+
+func (c *Client) PeerInterface() (string, error) {
+	if c.peerInterface != "" {
+		return c.peerInterface, nil
+	}
+
+	routerId, err := c.RouterId()
+	if err != nil {
+		return "", err
+	}
+
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+
+		for _, addr := range addrs {
+			switch a := addr.(type) {
+			case *net.IPNet:
+				if a.IP.String() == routerId {
+					c.peerInterface = iface.Name
+					return c.peerInterface, nil
+				}
+			}
+		}
+	}
+
+	return "", errors.New(fmt.Sprintf("Interface associated to \"%s\"", routerId))
 }

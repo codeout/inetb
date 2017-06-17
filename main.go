@@ -31,8 +31,12 @@ func (r Report) String() string {
 }
 
 
-func readBGPUpdate(client *client.Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
+func readBGPUpdate(client *client.Client, direction int, ch chan *bgp.BGPUpdate) error {
 	neighbor, err := client.Neighbor()
+	if err != nil {
+		return err
+	}
+	iface, err := client.PeerInterface()
 	if err != nil {
 		return err
 	}
@@ -87,8 +91,6 @@ func main() {
 	var (
 		port1 = flag.String("p1", "50051", "Port number which gobgp1 is listening on")
 		port2 = flag.String("p2", "50052", "Port number which gobgp2 is listening on")
-		iface1 = flag.String("i1", "eth0", "Interface name which gobgp1 is listening on")
-		iface2 = flag.String("i2", "eth1", "Interface name which gobgp2 is listening on")
 		wg sync.WaitGroup
 	)
 
@@ -116,8 +118,8 @@ func main() {
 
 	exportCh := make(chan *bgp.BGPUpdate)
 	importCh := make(chan *bgp.BGPUpdate)
-	go readBGPUpdate(client1, *iface1, Export, exportCh)
-	go readBGPUpdate(client2, *iface2, Import, importCh)
+	go readBGPUpdate(client1, Export, exportCh)
+	go readBGPUpdate(client2, Import, importCh)
 
 
 	log.Print("Start benchmarking - Send BGP Update from client1")
