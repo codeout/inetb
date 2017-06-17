@@ -6,6 +6,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"./client"
 	"github.com/osrg/gobgp/packet/bgp"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -29,7 +31,7 @@ func (r Report) String() string {
 }
 
 
-func readBGPUpdate(client *Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
+func readBGPUpdate(client *client.Client, iface string, direction int, ch chan *bgp.BGPUpdate) error {
 	neighbor, err := client.Neighbor()
 	if err != nil {
 		return err
@@ -96,19 +98,19 @@ func main() {
 	}
 
 	mrtPath := flag.Arg(0)
-	client1 := newClient(*port1)
-	client2 := newClient(*port2)
+	client1 := client.New(*port1)
+	client2 := client.New(*port2)
 
-	for _, client := range []*Client{client1, client2} {
+	for _, c := range []*client.Client{client1, client2} {
 		wg.Add(1)
 
-		go func(client *Client) {
-			if err := client.Init(mrtPath); err != nil {
+		go func(c *client.Client) {
+			if err := c.Init(mrtPath); err != nil {
 				log.Fatal(err)
 			}
 
 			wg.Done()
-		}(client)
+		}(c)
 	}
 	wg.Wait()
 

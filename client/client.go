@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ type Client struct {
 }
 
 
-func newClient(port string) *Client {
+func New(port string) *Client {
 	client, err := cli.New(net.JoinHostPort("127.0.0.1", port))
 
 	if err != nil {
