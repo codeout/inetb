@@ -50,7 +50,7 @@ func (c *Client) Init(mrtPath string) error {
 		return err
 	}
 
-	c.injectMrt(mrtPath, -1, 0, true)
+	c.LoadRoutes(mrtPath)
 	c.Log("Routes have been loaded on %s")
 
 	if err := c.RejectImport(); err != nil {

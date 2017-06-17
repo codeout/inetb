@@ -11,6 +11,11 @@ import (
 )
 
 
+func (c *Client) LoadRoutes(filename string) error {
+	return c.injectMrt(filename, -1, 0, true)
+}
+
+
 func (c *Client) injectMrt(filename string, count int, skip int, onlyBest bool) error {
 	// Hack
 	client := c.GobgpClient
