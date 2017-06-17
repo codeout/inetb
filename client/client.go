@@ -10,6 +10,12 @@ import (
 )
 
 
+const (
+	Import = 1
+	Export = 2
+)
+
+
 type Client struct {
 	Host string
 	Port string
