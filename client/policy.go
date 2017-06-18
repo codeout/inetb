@@ -21,7 +21,7 @@ func (c *Client) AcceptImport() error {
 }
 
 func (c *Client) AcceptExport() error {
-	return c.modifyPolicy(Import, table.ROUTE_TYPE_ACCEPT)
+	return c.modifyPolicy(Export, table.ROUTE_TYPE_ACCEPT)
 }
 
 func (c *Client) modifyPolicy(direction Direction, policy table.RouteType) error {
