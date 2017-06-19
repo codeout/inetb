@@ -52,7 +52,7 @@ func (c *Client) WaitToTurnDown() error {
 }
 
 func (c *Client) Wait(state config.SessionState, inverse... bool) error {
-	timeout := 60
+	timeout := 180
 	var statement string
 	var inversed bool
 
