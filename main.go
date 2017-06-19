@@ -39,8 +39,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case bgp := <-client1.Updates:
-					sent += len(bgp.NLRI)
+				case u := <-client1.Updates:
+					sent += len(u.NLRI)
 					tick = 0
 				default:
 					return
@@ -51,8 +51,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case bgp := <-client2.Updates:
-					received += len(bgp.NLRI)
+				case u := <-client2.Updates:
+					received += len(u.NLRI)
 					tick = 0
 				default:
 					return
