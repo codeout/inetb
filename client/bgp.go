@@ -1,17 +1,17 @@
 package client
 
 import (
-	"encoding/binary"
 	"bufio"
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/osrg/gobgp/packet/bgp"
-	"log"
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/google/gopacket/tcpassembly/tcpreader"
+	"github.com/osrg/gobgp/packet/bgp"
+	"log"
 )
 
 func (c *Client) StartReader() error {
@@ -60,15 +60,14 @@ func (c *Client) StartReader() error {
 	return nil
 }
 
-
-type bgpStreamFactory struct{
+type bgpStreamFactory struct {
 	updates chan *bgp.BGPUpdate
 }
 
 type bgpStream struct {
 	net, transport gopacket.Flow
-	r tcpreader.ReaderStream
-	updates chan *bgp.BGPUpdate
+	r              tcpreader.ReaderStream
+	updates        chan *bgp.BGPUpdate
 }
 
 func (factory *bgpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
@@ -97,24 +96,24 @@ func (b *bgpStream) split(data []byte, atEOF bool) (int, []byte, error) {
 	}
 
 	// find BGP Message Marker
-	for ; start <= len(data) - markerLen; start++ {
+	for ; start <= len(data)-markerLen; start++ {
 		if bytes.Equal(data[start:markerLen+start], BGP_MESSAGE_MARKER) {
 			break
 		}
 	}
 
 	// Request more data
-	if start + markerLen + 2 > len(data) {
+	if start+markerLen+2 > len(data) {
 		return 0, nil, nil
 	}
-	msgLen := int(binary.BigEndian.Uint16(data[start+markerLen:start+markerLen+2]))
+	msgLen := int(binary.BigEndian.Uint16(data[start+markerLen : start+markerLen+2]))
 
 	// Request more data
-	if start + msgLen > len(data) {
+	if start+msgLen > len(data) {
 		return 0, nil, nil
 	}
 
-	return start + msgLen, data[start:start+msgLen], nil
+	return start + msgLen, data[start : start+msgLen], nil
 }
 
 func (b *bgpStream) run() {

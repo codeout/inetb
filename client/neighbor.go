@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (c *Client) Neighbor(cache... bool) (*config.Neighbor, error) {
+func (c *Client) Neighbor(cache ...bool) (*config.Neighbor, error) {
 	if len(cache) == 0 || cache[0] {
 		if c.neighbor != nil {
 			return c.neighbor, nil
@@ -53,7 +53,7 @@ func (c *Client) WaitToTurnDown() error {
 	return c.Wait(config.SESSION_STATE_ESTABLISHED, true)
 }
 
-func (c *Client) Wait(state config.SessionState, inverse... bool) error {
+func (c *Client) Wait(state config.SessionState, inverse ...bool) error {
 	timeout := 180
 	var statement string
 	var inversed bool

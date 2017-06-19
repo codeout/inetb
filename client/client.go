@@ -37,7 +37,7 @@ func New(port string) *Client {
 	return &Client{
 		Port:        port,
 		GobgpClient: client,
-		Updates: 	   make(chan *bgp.BGPUpdate, 65536),
+		Updates:     make(chan *bgp.BGPUpdate, 65536),
 	}
 }
 
