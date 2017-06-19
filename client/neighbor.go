@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/packet/bgp"
@@ -45,46 +44,48 @@ func (c *Client) SoftReset() error {
 }
 
 func (c *Client) WaitToTurnUp() error {
-	return c.Wait([]config.SessionState{config.SESSION_STATE_ESTABLISHED})
+	return c.Wait(config.SESSION_STATE_ESTABLISHED)
 }
 
 func (c *Client) WaitToTurnDown() error {
-	return c.Wait([]config.SessionState{
-		config.SESSION_STATE_IDLE,
-		config.SESSION_STATE_CONNECT,
-		config.SESSION_STATE_ACTIVE,
-		config.SESSION_STATE_OPENSENT,
-		config.SESSION_STATE_OPENCONFIRM,
-	})
+	return c.Wait(config.SESSION_STATE_ESTABLISHED, true)
 }
 
-func (c *Client) Wait(states []config.SessionState) error {
+func (c *Client) Wait(state config.SessionState, inverse... bool) error {
 	timeout := 60
+	var statement string
+	var inversed bool
 
-	c.Log("Waiting for neighbor to change on %s")
-
-	state, err := func () (config.SessionState, error) {
-		for i := 0; i < timeout; i++ {
-			neighbor, err := c.Neighbor()
-			if err != nil {
-				return "", err
-			}
-
-			for _, state := range states {
-				if neighbor.State.SessionState == state {
-					return state, nil
-				}
-			}
-
-			time.Sleep(time.Second)
-		}
-
-		return "", errors.New("Timed out")
-	}()
-	if err != nil {
-		return err
+	if len(inverse) > 0 && inverse[0] {
+		statement = fmt.Sprintf("not to be %s", state)
+		inversed = true
+	} else {
+		statement = fmt.Sprintf("to be %s", state)
+		inversed = false
 	}
 
-	c.Log(fmt.Sprintf("Neighbor has been %s on %%s", state))
+	c.Log(fmt.Sprintf("Waiting for neighbor %s on %%s", statement))
+
+	for i := 0; i < timeout; i++ {
+		neighbor, err := c.Neighbor()
+		if err != nil {
+			return err
+		}
+
+		if inversed {
+			if neighbor.State.SessionState != state {
+				c.Log(fmt.Sprintf("Neighbor has been %s on %%s", neighbor.State.SessionState))
+				return nil
+			}
+		} else {
+			if neighbor.State.SessionState == state {
+				c.Log(fmt.Sprintf("Neighbor has been %s on %%s", neighbor.State.SessionState))
+				return nil
+			}
+		}
+
+		time.Sleep(time.Second)
+	}
+
 	return nil
 }
