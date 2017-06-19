@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
-func (c *Client) Neighbor() (*config.Neighbor, error) {
-	if c.neighbor != nil {
-		return c.neighbor, nil
+func (c *Client) Neighbor(cache... bool) (*config.Neighbor, error) {
+	if len(cache) == 0 || cache[0] {
+		if c.neighbor != nil {
+			return c.neighbor, nil
+		}
 	}
 
 	if neighbors, err := c.GobgpClient.ListNeighbor(); err != nil {
@@ -67,7 +69,7 @@ func (c *Client) Wait(state config.SessionState, inverse... bool) error {
 	c.Log(fmt.Sprintf("Waiting for neighbor %s on %%s", statement))
 
 	for i := 0; i < timeout; i++ {
-		neighbor, err := c.Neighbor()
+		neighbor, err := c.Neighbor(false)
 		if err != nil {
 			return err
 		}
