@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func (c *Client) ReadBGPUpdate(direction Direction, ch chan *bgp.BGPUpdate) error {
+func (c *Client) StartReader() error {
 	neighbor, err := c.Neighbor()
 	if err != nil {
 		return err
@@ -19,15 +19,8 @@ func (c *Client) ReadBGPUpdate(direction Direction, ch chan *bgp.BGPUpdate) erro
 		return err
 	}
 
-	var filter string
-	switch direction {
-	case Export:
-		log.Printf("Start capturing outgoing BGP updates from %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
-		filter = fmt.Sprintf("tcp and port 179 and dst %s", neighbor.Config.NeighborAddress)
-	case Import:
-		log.Printf("Start capturing incoming BGP updates to %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
-		filter = fmt.Sprintf("tcp and port 179 and src %s", neighbor.Config.NeighborAddress)
-	}
+	log.Printf("Start capturing outgoing BGP updates from %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
+	filter := fmt.Sprintf("tcp and port 179 and host %s", neighbor.Config.NeighborAddress)
 
 	handle, err := pcap.OpenLive(iface, 1600, false, pcap.BlockForever)
 	if err != nil {

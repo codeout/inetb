@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"./client"
-	"github.com/osrg/gobgp/packet/bgp"
 )
 
 type Report struct {
@@ -22,11 +21,6 @@ func (r Report) String() string {
 }
 
 func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
-	exportCh := make(chan *bgp.BGPUpdate)
-	importCh := make(chan *bgp.BGPUpdate)
-	go client1.ReadBGPUpdate(client.Export, exportCh)
-	go client2.ReadBGPUpdate(client.Import, importCh)
-
 	log.Print("Start benchmarking - Advertise new routes from client1")
 
 	if err := client1.DeprefExport(); err != nil {
@@ -45,7 +39,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case bgp := <-exportCh:
+				case bgp := <-client1.Updates:
 					sent += len(bgp.NLRI)
 					tick = 0
 				default:
@@ -57,7 +51,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case bgp := <-importCh:
+				case bgp := <-client2.Updates:
 					received += len(bgp.NLRI)
 					tick = 0
 				default:
@@ -97,6 +91,11 @@ func main() {
 	mrtPath := flag.Arg(0)
 	client1 := client.New(*port1)
 	client2 := client.New(*port2)
+
+	go client1.StartReader()
+	go client2.StartReader()
+
+	time.Sleep(2*time.Second)  // NOTE: Wait for readers
 
 	for _, c := range []*client.Client{client1, client2} {
 		wg.Add(1)

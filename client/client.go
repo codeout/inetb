@@ -5,6 +5,7 @@ import (
 	"fmt"
 	cli "github.com/osrg/gobgp/client"
 	"github.com/osrg/gobgp/config"
+	"github.com/osrg/gobgp/packet/bgp"
 	"log"
 	"net"
 )
@@ -20,6 +21,7 @@ type Client struct {
 	Host          string
 	Port          string
 	GobgpClient   *cli.Client
+	Updates       chan *bgp.BGPUpdate
 	neighbor      *config.Neighbor
 	routerId      string
 	peerInterface string
@@ -35,6 +37,7 @@ func New(port string) *Client {
 	return &Client{
 		Port:        port,
 		GobgpClient: client,
+		Updates: 	   make(chan *bgp.BGPUpdate),
 	}
 }
 
