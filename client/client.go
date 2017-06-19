@@ -48,7 +48,11 @@ func (c *Client) Init(mrtPath string) error {
 		return err
 	}
 
-	if err := c.WaitToEstablish(); err != nil {
+	if err := c.WaitToTurnDown(); err != nil {
+		return err
+	}
+
+	if err := c.WaitToTurnUp(); err != nil {
 		return err
 	}
 

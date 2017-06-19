@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+	"fmt"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/packet/bgp"
 	"time"
@@ -42,24 +44,47 @@ func (c *Client) SoftReset() error {
 	return nil
 }
 
-func (c *Client) WaitToEstablish() error {
+func (c *Client) WaitToTurnUp() error {
+	return c.Wait([]config.SessionState{config.SESSION_STATE_ESTABLISHED})
+}
+
+func (c *Client) WaitToTurnDown() error {
+	return c.Wait([]config.SessionState{
+		config.SESSION_STATE_IDLE,
+		config.SESSION_STATE_CONNECT,
+		config.SESSION_STATE_ACTIVE,
+		config.SESSION_STATE_OPENSENT,
+		config.SESSION_STATE_OPENCONFIRM,
+	})
+}
+
+func (c *Client) Wait(states []config.SessionState) error {
 	timeout := 60
 
-	c.Log("Waiting for neighbor to establish on %s")
+	c.Log("Waiting for neighbor to change on %s")
 
-	for i := 0; i < timeout; i++ {
-		neighbor, err := c.Neighbor()
-		if err != nil {
-			return err
+	state, err := func () (config.SessionState, error) {
+		for i := 0; i < timeout; i++ {
+			neighbor, err := c.Neighbor()
+			if err != nil {
+				return "", err
+			}
+
+			for _, state := range states {
+				if neighbor.State.SessionState == state {
+					return state, nil
+				}
+			}
+
+			time.Sleep(time.Second)
 		}
 
-		if neighbor.State.SessionState == config.SESSION_STATE_ESTABLISHED {
-			break
-		}
-
-		time.Sleep(time.Second)
+		return "", errors.New("Timed out")
+	}()
+	if err != nil {
+		return err
 	}
 
-	c.Log("Neighbor has been established on %s")
+	c.Log(fmt.Sprintf("Neighbor has been %s on %%s", state))
 	return nil
 }
