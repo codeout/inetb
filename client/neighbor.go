@@ -53,7 +53,7 @@ func (c *Client) WaitToEstablish() error {
 			return err
 		}
 
-		if neighbor.State.SessionState == "established" {
+		if neighbor.State.SessionState == config.SESSION_STATE_ESTABLISHED {
 			break
 		}
 
