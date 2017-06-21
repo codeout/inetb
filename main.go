@@ -73,6 +73,11 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 
 		log.Print(report.String())
 		reports = append(reports, report)
+
+		if sent == 0 && received == 0 {
+			tick = 0
+		}
+
 		time.Sleep(time.Second)
 	}
 
