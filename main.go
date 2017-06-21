@@ -6,8 +6,7 @@ import (
 	"log"
 	"sync"
 	"time"
-
-	"./client"
+	"github.com/codeout/inetb/client"
 )
 
 type Report struct {
