@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/codeout/inetb/client"
+	"io/ioutil"
 	"log"
 	"sync"
 	"time"
@@ -19,7 +21,7 @@ func (r Report) String() string {
 	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
 }
 
-func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
+func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 	log.Print("Start benchmarking - Advertise new routes from client1")
 
 	if err := client1.DeprefExport(); err != nil {
@@ -29,7 +31,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		log.Fatal(err)
 	}
 
-	reports := make([]*Report, 600)
+	reports := make([]*Report, 0)
 	sent := 0
 	received := 0
 	timeout := 5
@@ -75,6 +77,14 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 	}
 
 	log.Print("Stop benchmarking - Advertise new routes from client1")
+
+	json, err := json.Marshal(reports)
+	if err != nil {
+		return err
+	}
+
+	ioutil.WriteFile("advertise_new_routes.json", json, 0644)
+	return err
 }
 
 func main() {
