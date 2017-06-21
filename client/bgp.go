@@ -14,6 +14,10 @@ import (
 	"log"
 )
 
+
+var BGP_MESSAGE_MARKER = bytes.Repeat([]byte{255}, 16)
+
+
 func (c *Client) StartReader() error {
 	neighbor, err := c.Neighbor()
 	if err != nil {
@@ -81,8 +85,6 @@ func (factory *bgpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.S
 
 	return &bstream.r
 }
-
-var BGP_MESSAGE_MARKER = bytes.Repeat([]byte{255}, 16)
 
 func (b *bgpStream) split(data []byte, atEOF bool) (int, []byte, error) {
 	start := 0
