@@ -39,8 +39,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case u := <-client1.Updates:
-					sent += len(u.NLRI)
+				case update := <- client1.Updates:
+					sent += len(update.Raw.NLRI)
 					tick = 0
 				default:
 					return
@@ -51,8 +51,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case u := <-client2.Updates:
-					received += len(u.NLRI)
+				case update := <- client2.Updates:
+					received += len(update.Raw.NLRI)
 					tick = 0
 				default:
 					return

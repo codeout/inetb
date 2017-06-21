@@ -12,6 +12,7 @@ import (
 	"github.com/google/gopacket/tcpassembly/tcpreader"
 	"github.com/osrg/gobgp/packet/bgp"
 	"log"
+	"errors"
 )
 
 
@@ -65,13 +66,13 @@ func (c *Client) StartReader() error {
 }
 
 type bgpStreamFactory struct {
-	updates chan *bgp.BGPUpdate
+	updates chan *BGPUpdate
 }
 
 type bgpStream struct {
 	net, transport gopacket.Flow
 	r              tcpreader.ReaderStream
-	updates        chan *bgp.BGPUpdate
+	updates        chan *BGPUpdate
 }
 
 func (factory *bgpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
@@ -118,14 +119,35 @@ func (b *bgpStream) split(data []byte, atEOF bool) (int, []byte, error) {
 	return start + msgLen, data[start : start+msgLen], nil
 }
 
+func nexthop(update *bgp.BGPUpdate) (string, error) {
+	for _, attribute := range update.PathAttributes {
+		if attribute.GetType() == bgp.BGP_ATTR_TYPE_NEXT_HOP {
+			nexthop := attribute.(*bgp.PathAttributeNextHop)
+			return nexthop.Value.String(), nil
+		}
+	}
+
+	return "", errors.New("No nexthop is found")
+}
+
 func (b *bgpStream) run() {
 	scanner := bufio.NewScanner(&b.r)
 	scanner.Split(b.split)
+	seq := 1
 
 	for scanner.Scan() {
 		msg, _ := bgp.ParseBGPMessage(scanner.Bytes())
 		if msg.Header.Type == bgp.BGP_MSG_UPDATE {
-			b.updates <- msg.Body.(*bgp.BGPUpdate)
+			update := msg.Body.(*bgp.BGPUpdate)
+			nexthop, _ := nexthop(update)
+
+			b.updates <- &BGPUpdate{
+				Sequence: seq,
+				Nexthop: nexthop,
+				Raw: update,
+			}
 		}
+
+		seq++
 	}
 }
