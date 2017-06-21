@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/codeout/inetb/client"
 	"log"
 	"sync"
 	"time"
-	"github.com/codeout/inetb/client"
 )
 
 type Report struct {
@@ -38,7 +38,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case update := <- client1.Updates:
+				case update := <-client1.Updates:
 					sent += len(update.Raw.NLRI)
 					tick = 0
 				default:
@@ -50,7 +50,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 		func() {
 			for {
 				select {
-				case update := <- client2.Updates:
+				case update := <-client2.Updates:
 					received += len(update.Raw.NLRI)
 					tick = 0
 				default:
@@ -94,7 +94,7 @@ func main() {
 	go client1.StartReader()
 	go client2.StartReader()
 
-	time.Sleep(2*time.Second)  // NOTE: Wait for readers
+	time.Sleep(2 * time.Second) // NOTE: Wait for readers
 
 	for _, c := range []*client.Client{client1, client2} {
 		wg.Add(1)

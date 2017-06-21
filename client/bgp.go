@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -12,12 +13,9 @@ import (
 	"github.com/google/gopacket/tcpassembly/tcpreader"
 	"github.com/osrg/gobgp/packet/bgp"
 	"log"
-	"errors"
 )
 
-
 var BGP_MESSAGE_MARKER = bytes.Repeat([]byte{255}, 16)
-
 
 func (c *Client) StartReader() error {
 	neighbor, err := c.Neighbor()
@@ -143,8 +141,8 @@ func (b *bgpStream) run() {
 
 			b.updates <- &BGPUpdate{
 				Sequence: seq,
-				Nexthop: nexthop,
-				Raw: update,
+				Nexthop:  nexthop,
+				Raw:      update,
 			}
 		}
 

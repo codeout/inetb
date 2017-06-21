@@ -9,7 +9,6 @@ import (
 	"net"
 )
 
-
 type Client struct {
 	Host          string
 	Port          string
@@ -19,7 +18,6 @@ type Client struct {
 	routerId      string
 	peerInterface string
 }
-
 
 func New(port string) *Client {
 	client, err := cli.New(net.JoinHostPort("127.0.0.1", port))
