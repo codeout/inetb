@@ -39,7 +39,9 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 			for {
 				select {
 				case update := <-client1.Updates:
-					sent += len(update.Raw.NLRI)
+					if routerId, _ := client1.RouterId(); update.Nexthop == routerId {
+						sent += len(update.Raw.NLRI)
+					}
 					tick = 0
 				default:
 					return
@@ -51,7 +53,9 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) {
 			for {
 				select {
 				case update := <-client2.Updates:
-					received += len(update.Raw.NLRI)
+					if routerId, _ := client1.RouterId(); update.Nexthop != routerId {
+						received += len(update.Raw.NLRI)
+					}
 					tick = 0
 				default:
 					return
