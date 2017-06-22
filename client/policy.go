@@ -64,8 +64,27 @@ func (c *Client) modifyPolicy(direction Direction, policy table.RouteType) error
 }
 
 func (c *Client) DeprefExport() error {
-	name := "depref"
+	server, err := c.GobgpClient.GetServer()
+	if err != nil {
+		return err
+	}
 
+	return c.ApplyPolicy("depref", []config.Statement{
+		{
+			Actions: config.Actions{
+				BgpActions: config.BgpActions{
+					SetAsPathPrepend: config.SetAsPathPrepend{
+						RepeatN: 1,
+						As:      strconv.FormatUint(uint64(server.Config.As), 10),
+					},
+					SetNextHop: "self",
+				},
+			},
+		},
+	})
+}
+
+func (c *Client) ApplyPolicy(name string, statements []config.Statement) error {
 	policies, err := c.GobgpClient.GetPolicy()
 	if err != nil {
 		return err
@@ -79,26 +98,9 @@ func (c *Client) DeprefExport() error {
 	}
 
 	if !found {
-		server, err := c.GobgpClient.GetServer()
-		if err != nil {
-			return err
-		}
-
 		policy, err := table.NewPolicy(config.PolicyDefinition{
-			Name: name,
-			Statements: []config.Statement{
-				{
-					Actions: config.Actions{
-						BgpActions: config.BgpActions{
-							SetAsPathPrepend: config.SetAsPathPrepend{
-								RepeatN: 1,
-								As:      strconv.FormatUint(uint64(server.Config.As), 10),
-							},
-							SetNextHop: "self",
-						},
-					},
-				},
-			},
+			Name:       name,
+			Statements: statements,
 		})
 		if err != nil {
 			return err
@@ -118,6 +120,6 @@ func (c *Client) DeprefExport() error {
 		}
 	}
 
-	c.Log("Depref exporting routes on %s")
+	c.Log(fmt.Sprintf("Apply policy \"%s\" on %%s", name))
 	return nil
 }
