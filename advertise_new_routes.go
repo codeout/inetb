@@ -42,7 +42,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 			for {
 				select {
 				case update := <-client2.Updates:
-					if routerId, _ := client1.RouterId(); update.Nexthop != routerId {
+					if routerId, _ := client2.RouterId(); update.Nexthop != routerId {
 						received += len(update.Raw.NLRI)
 					}
 					tick = 0
