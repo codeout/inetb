@@ -56,4 +56,5 @@ func main() {
 	wg.Wait()
 
 	advertiseNewRoutes(client1, client2)
+	advertiseStrongRoutes(client1, client2)
 }

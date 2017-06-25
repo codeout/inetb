@@ -84,6 +84,18 @@ func (c *Client) DeprefExport() error {
 	})
 }
 
+func (c *Client) NexthopSelf() error {
+	return c.ApplyPolicy("nexthop_self", []config.Statement{
+		{
+			Actions: config.Actions{
+				BgpActions: config.BgpActions{
+					SetNextHop: "self",
+				},
+			},
+		},
+	})
+}
+
 func (c *Client) ApplyPolicy(name string, statements []config.Statement) error {
 	policies, err := c.GobgpClient.GetPolicy()
 	if err != nil {
