@@ -57,4 +57,5 @@ func main() {
 
 	advertiseNewRoutes(client1, client2)
 	advertiseStrongRoutes(client1, client2)
+	withdrawStrongRoutes(client1, client2)
 }
