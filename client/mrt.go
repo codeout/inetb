@@ -30,7 +30,6 @@ func (c *Client) injectMrt(filename string, count int, skip int, onlyBest bool) 
 	}
 
 	// Ported from github.com/osrg/gobgp/gobgp/cmd/mrt.go
-	//
 	file, err := os.Open(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %s", err)
