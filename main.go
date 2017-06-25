@@ -1,12 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/codeout/inetb/client"
+	"io/ioutil"
 	"log"
+	"path"
 	"sync"
 	"time"
+	"os"
 )
 
 type Report struct {
@@ -17,6 +21,22 @@ type Report struct {
 
 func (r Report) String() string {
 	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
+}
+
+func WriteReport(file string, reports []*Report) error {
+	json, err := json.Marshal(reports)
+	if err != nil {
+		return err
+	}
+
+	dir := "reports"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.Mkdir(dir, 0755); err != nil {
+			return err
+		}
+	}
+
+	return ioutil.WriteFile(path.Join(dir, file), json, 0644)
 }
 
 func main() {

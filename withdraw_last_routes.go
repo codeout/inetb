@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/codeout/inetb/client"
-	"io/ioutil"
 	"log"
 	"time"
 )
@@ -67,11 +65,5 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 
 	log.Print("Stop benchmarking - Withdraw last routes from client1")
 
-	json, err := json.Marshal(reports)
-	if err != nil {
-		return err
-	}
-
-	ioutil.WriteFile("withdraw_last_routes.json", json, 0644)
-	return err
+	return WriteReport("withdraw_last_routes.json", reports)
 }

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/codeout/inetb/client"
-	"io/ioutil"
 	"log"
 	"time"
 )
@@ -71,11 +69,5 @@ func advertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 
 	log.Print("Stop benchmarking - Advertise new routes from client2")
 
-	json, err := json.Marshal(reports)
-	if err != nil {
-		return err
-	}
-
-	ioutil.WriteFile("advertise_strong_routes.json", json, 0644)
-	return err
+	return WriteReport("advertise_strong_routes.json", reports)
 }
