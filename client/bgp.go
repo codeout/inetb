@@ -22,15 +22,15 @@ func (c *Client) StartReader() error {
 	if err != nil {
 		return err
 	}
-	iface, err := c.PeerInterface()
+	local, err := c.RouterId()  // NOTE: Assume that router id == local address
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Start capturing outgoing BGP updates from %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
-	filter := fmt.Sprintf("tcp and port 179 and host %s", neighbor.Config.NeighborAddress)
+	log.Printf("Start capturing outgoing BGP updates between %s and %s", local, neighbor.Config.NeighborAddress)
+	filter := fmt.Sprintf("tcp and port 179 and host %s and host %s", local, neighbor.Config.NeighborAddress)
 
-	handle, err := pcap.OpenLive(iface, 1600, false, pcap.BlockForever)
+	handle, err := pcap.OpenLive("any", 1600, false, pcap.BlockForever)
 	if err != nil {
 		log.Fatal(err)
 	}
