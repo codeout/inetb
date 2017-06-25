@@ -22,7 +22,7 @@ func (c *Client) StartReader() error {
 	if err != nil {
 		return err
 	}
-	local, err := c.RouterId()  // NOTE: Assume that router id == local address
+	local, err := c.RouterId() // NOTE: Assume that router id == local address
 	if err != nil {
 		return err
 	}

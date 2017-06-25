@@ -7,10 +7,10 @@ import (
 	"github.com/codeout/inetb/client"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"sync"
 	"time"
-	"os"
 )
 
 type Report struct {
