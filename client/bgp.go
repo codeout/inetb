@@ -30,7 +30,7 @@ func (c *Client) StartReader() error {
 	log.Printf("Start capturing outgoing BGP updates between %s and %s", local, neighbor.Config.NeighborAddress)
 	filter := fmt.Sprintf("tcp and port 179 and host %s and host %s", local, neighbor.Config.NeighborAddress)
 
-	handle, err := pcap.OpenLive("any", 1600, false, pcap.BlockForever)
+	handle, err := pcap.OpenLive("any", 9174, false, pcap.BlockForever)
 	if err != nil {
 		log.Fatal(err)
 	}
