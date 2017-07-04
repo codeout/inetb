@@ -35,6 +35,30 @@ func (c *Client) Reset() error {
 	return nil
 }
 
+func (c *Client) Enable() error {
+	neighbor, err := c.Neighbor()
+	if err != nil {
+		return err
+	}
+
+	c.Log("Enable neighbor on %s")
+	c.GobgpClient.EnableNeighbor(neighbor.Config.NeighborAddress)
+
+	return nil
+}
+
+func (c *Client) Disable() error {
+	neighbor, err := c.Neighbor()
+	if err != nil {
+		return err
+	}
+
+	c.Log("Disable neighbor on %s")
+	c.GobgpClient.DisableNeighbor(neighbor.Config.NeighborAddress, "Hi!")
+
+	return nil
+}
+
 func (c *Client) SoftReset() error {
 	neighbor, err := c.Neighbor()
 	if err != nil {

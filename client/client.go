@@ -36,7 +36,7 @@ func New(port string) *Client {
 func (c *Client) Init(mrtPath string) error {
 	c.Host = "127.0.0.1"
 
-	if err := c.Reset(); err != nil {
+	if err := c.Disable(); err != nil {
 		return err
 	}
 
@@ -44,7 +44,7 @@ func (c *Client) Init(mrtPath string) error {
 		return err
 	}
 
-	if err := c.WaitToTurnUp(); err != nil {
+	if err := c.RejectExport(); err != nil {
 		return err
 	}
 
@@ -52,14 +52,18 @@ func (c *Client) Init(mrtPath string) error {
 		return err
 	}
 
-	if err := c.RejectExport(); err != nil {
-		return err
-	}
-
 	c.LoadRoutes(mrtPath)
 	c.Log("Routes have been loaded on %s")
 
 	if err := c.RejectImport(); err != nil {
+		return err
+	}
+
+	if err := c.Enable(); err != nil {
+		return err
+	}
+
+	if err := c.WaitToTurnUp(); err != nil {
 		return err
 	}
 
