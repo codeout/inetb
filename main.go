@@ -48,8 +48,13 @@ func main() {
 		wg    sync.WaitGroup
 	)
 
+	flag.Usage = func() {
+    fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] MRT_FILE\n\nOptions\n", os.Args[0])
+    flag.PrintDefaults()
+  }
 	flag.Parse()
 	if flag.NArg() == 0 {
+		flag.Usage()
 		log.Fatal("MRT Table Dump file is required")
 	}
 
