@@ -27,7 +27,7 @@ func (c *Client) StartReader() error {
 		return err
 	}
 
-	log.Printf("Start capturing outgoing BGP updates from %s on \"%s\"", neighbor.Config.NeighborAddress, iface)
+	log.Printf(`Start capturing outgoing BGP updates from %s on "%s"`, neighbor.Config.NeighborAddress, iface)
 	filter := fmt.Sprintf("tcp and port 179 and host %s", neighbor.Config.NeighborAddress)
 
 	handle, err := pcap.OpenLive(iface, 9174, false, pcap.BlockForever)

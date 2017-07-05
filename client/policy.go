@@ -59,7 +59,7 @@ func (c *Client) modifyPolicy(direction Direction, policy table.RouteType) error
 		log.Fatal(err)
 	}
 
-	c.Log(fmt.Sprintf("%s policy for %%s is set to \"%s\"", directionText, policyText))
+	c.Log(fmt.Sprintf(`%s policy for %%s is set to "%s"`, directionText, policyText))
 	return nil
 }
 
@@ -132,6 +132,6 @@ func (c *Client) ApplyPolicy(name string, statements []config.Statement) error {
 		}
 	}
 
-	c.Log(fmt.Sprintf("Apply policy \"%s\" on %%s", name))
+	c.Log(fmt.Sprintf(`Apply policy "%s" on %%s`, name))
 	return nil
 }
