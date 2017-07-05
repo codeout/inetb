@@ -20,7 +20,7 @@ func advertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 	reports := make([]*Report, 0)
 	sent := 0
 	received := 0
-	timeout := 5
+	timeout := 10
 
 	for tick := 0; tick < timeout; tick++ {
 		func() {
