@@ -20,11 +20,11 @@ var BGP_MESSAGE_MARKER = bytes.Repeat([]byte{255}, 16)
 func (c *Client) StartReader() error {
 	neighbor, err := c.Neighbor()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	iface, err := c.PeerInterface()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	localAddress, err := c.LocalAddress()
