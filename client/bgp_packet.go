@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/osrg/gobgp/packet/bgp"
 	"github.com/google/gopacket"
+	"github.com/osrg/gobgp/packet/bgp"
 )
 
 type Direction int

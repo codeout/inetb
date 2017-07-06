@@ -49,9 +49,9 @@ func main() {
 	)
 
 	flag.Usage = func() {
-    fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] MRT_FILE\n\nOptions\n", os.Args[0])
-    flag.PrintDefaults()
-  }
+		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] MRT_FILE\n\nOptions\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	if flag.NArg() == 0 {
 		flag.Usage()
