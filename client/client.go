@@ -94,7 +94,7 @@ func (c *Client) PeerInterface() (string, error) {
 		return c.peerInterface, nil
 	}
 
-	routerId, err := c.RouterId()
+	localAddress, err := c.LocalAddress()
 	if err != nil {
 		return "", err
 	}
@@ -113,7 +113,7 @@ func (c *Client) PeerInterface() (string, error) {
 		for _, addr := range addrs {
 			switch a := addr.(type) {
 			case *net.IPNet:
-				if a.IP.String() == routerId {
+				if a.IP.String() == localAddress {
 					c.peerInterface = iface.Name
 					return c.peerInterface, nil
 				}
