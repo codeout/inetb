@@ -121,5 +121,5 @@ func (c *Client) PeerInterface() (string, error) {
 		}
 	}
 
-	return "", errors.New(fmt.Sprintf(`Interface associated to "%s"`, routerId))
+	return "", errors.New(fmt.Sprintf(`No interface associated to "%s"`, localAddress))
 }
