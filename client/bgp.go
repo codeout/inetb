@@ -151,6 +151,7 @@ func (b *bgpStream) run() {
 				Sequence: seq,
 				Nexthop:  nexthop,
 				Raw:      update,
+				Net:      b.net,
 			}
 		}
 

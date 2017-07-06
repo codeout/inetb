@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"github.com/google/gopacket"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/packet/bgp"
 	"time"
@@ -37,6 +38,34 @@ func (c *Client) LocalAddress() (string, error) {
 	}
 
 	return neighbor.Transport.Config.LocalAddress, nil
+}
+
+func (c *Client) IsImportUpdate(net gopacket.Flow) bool {
+	neighbor, err := c.Neighbor()
+	if err != nil {
+		return false
+	}
+	localAddress, err := c.LocalAddress()
+	if err != nil {
+		return false
+	}
+
+	// NOTE: Assume Flow#String() returns in "%v->%v" format
+	return net.String() == fmt.Sprintf("%s->%s", neighbor.Config.NeighborAddress, localAddress)
+}
+
+func (c *Client) IsExportUpdate(net gopacket.Flow) bool {
+	neighbor, err := c.Neighbor()
+	if err != nil {
+		return false
+	}
+	localAddress, err := c.LocalAddress()
+	if err != nil {
+		return false
+	}
+
+	// NOTE: Assume Flow#String() returns in "%v->%v" format
+	return net.String() == fmt.Sprintf("%s->%s", localAddress, neighbor.Config.NeighborAddress)
 }
 
 func (c *Client) Reset() error {

@@ -12,7 +12,6 @@ func advertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 	if err := client2.NexthopSelf(); err != nil {
 		log.Fatal(err)
 	}
-
 	if err := client2.AcceptExport(); err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +26,7 @@ func advertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 			for {
 				select {
 				case update := <-client2.Updates:
-					if routerId, _ := client2.RouterId(); update.Nexthop == routerId {
+					if client2.IsExportUpdate(update.Net) {
 						sent += len(update.Raw.NLRI)
 					}
 					tick = 0
@@ -41,7 +40,7 @@ func advertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 			for {
 				select {
 				case update := <-client1.Updates:
-					if routerId, _ := client1.RouterId(); update.Nexthop != routerId {
+					if client1.IsImportUpdate(update.Net) {
 						received += len(update.Raw.NLRI)
 					}
 					tick = 0

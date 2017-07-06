@@ -23,7 +23,7 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 			for {
 				select {
 				case update := <-client1.Updates:
-					if update.Nexthop == "" {
+					if client1.IsExportUpdate(update.Net) {
 						sent += len(update.Raw.WithdrawnRoutes)
 					}
 					tick = 0
@@ -37,7 +37,7 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 			for {
 				select {
 				case update := <-client2.Updates:
-					if update.Nexthop == "" {
+					if client2.IsImportUpdate(update.Net) {
 						received += len(update.Raw.WithdrawnRoutes)
 					}
 					tick = 0

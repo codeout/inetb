@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/osrg/gobgp/packet/bgp"
+	"github.com/google/gopacket"
 )
 
 type Direction int
@@ -15,4 +16,5 @@ type BGPUpdate struct {
 	Sequence int
 	Nexthop  string
 	Raw      *bgp.BGPUpdate
+	Net      gopacket.Flow
 }
