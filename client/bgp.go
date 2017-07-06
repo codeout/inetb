@@ -22,12 +22,11 @@ func (c *Client) StartReader() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	iface, err := c.PeerInterface()
+	localAddress, err := c.LocalAddress()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	localAddress, err := c.LocalAddress()
+	iface, err := c.PeerInterface()
 	if err != nil {
 		log.Fatal(err)
 	}
