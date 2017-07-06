@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -125,17 +124,6 @@ func (b *bgpStream) split(data []byte, atEOF bool) (int, []byte, error) {
 	return start + msgLen, data[start : start+msgLen], nil
 }
 
-func nexthop(update *bgp.BGPUpdate) (string, error) {
-	for _, attribute := range update.PathAttributes {
-		if attribute.GetType() == bgp.BGP_ATTR_TYPE_NEXT_HOP {
-			nexthop := attribute.(*bgp.PathAttributeNextHop)
-			return nexthop.Value.String(), nil
-		}
-	}
-
-	return "", errors.New("No nexthop is found")
-}
-
 func (b *bgpStream) run() {
 	scanner := bufio.NewScanner(&b.r)
 	scanner.Split(b.split)
@@ -145,11 +133,9 @@ func (b *bgpStream) run() {
 		msg, _ := bgp.ParseBGPMessage(scanner.Bytes())
 		if msg.Header.Type == bgp.BGP_MSG_UPDATE {
 			update := msg.Body.(*bgp.BGPUpdate)
-			nexthop, _ := nexthop(update)
 
 			b.updates <- &BGPUpdate{
 				Sequence: seq,
-				Nexthop:  nexthop,
 				Raw:      update,
 				Net:      b.net,
 			}

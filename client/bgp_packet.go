@@ -14,7 +14,6 @@ const (
 
 type BGPUpdate struct {
 	Sequence int
-	Nexthop  string
 	Raw      *bgp.BGPUpdate
 	Net      gopacket.Flow
 }
