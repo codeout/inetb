@@ -27,17 +27,16 @@ func (c *Client) StartReader() error {
 		return err
 	}
 
-	if neighbor.Transport.Config.LocalAddress == "0.0.0.0" {
-		log.Fatal(errors.New(
-			fmt.Sprintf(`No local address configured for neighbor "%s"`, neighbor.Config.NeighborAddress),
-		))
+	localAddress, err := c.LocalAddress()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Printf(`Start capturing outgoing BGP updates from %s on "%s"`, neighbor.Config.NeighborAddress, iface)
 	filter := fmt.Sprintf(
 		"tcp and port 179 and host %s and host %s",
 		neighbor.Config.NeighborAddress,
-		neighbor.Transport.Config.LocalAddress,
+		localAddress,
 	)
 
 	handle, err := pcap.OpenLive(iface, 9174, false, pcap.BlockForever)

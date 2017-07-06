@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"github.com/osrg/gobgp/config"
 	"github.com/osrg/gobgp/packet/bgp"
@@ -21,6 +22,21 @@ func (c *Client) Neighbor(cache ...bool) (*config.Neighbor, error) {
 	}
 
 	return c.neighbor, nil
+}
+
+func (c *Client) LocalAddress() (string, error) {
+	neighbor, err := c.Neighbor()
+	if err != nil {
+		return "", err
+	}
+
+	if neighbor.Transport.Config.LocalAddress == "0.0.0.0" {
+		return "", errors.New(
+			fmt.Sprintf(`No local address configured for neighbor "%s"`, neighbor.Config.NeighborAddress),
+		)
+	}
+
+	return neighbor.Transport.Config.LocalAddress, nil
 }
 
 func (c *Client) Reset() error {
