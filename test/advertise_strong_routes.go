@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/codeout/inetb/client"
@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
-	log.Print("Start benchmarking - Advertise new routes from client1")
+func AdvertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error {
+	log.Print("Start benchmarking - Advertise strong routes from client2")
 
-	if err := client1.DeprefExport(); err != nil {
+	if err := client2.NexthopSelf(); err != nil {
 		log.Fatal(err)
 	}
-	if err := client1.AcceptExport(); err != nil {
+	if err := client2.AcceptExport(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -25,8 +25,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 		func() {
 			for {
 				select {
-				case update := <-client1.Updates:
-					if client1.IsExportUpdate(update.Net) {
+				case update := <-client2.Updates:
+					if client2.IsExportUpdate(update.Net) {
 						sent += len(update.Raw.NLRI)
 					}
 					tick = 0
@@ -39,8 +39,8 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 		func() {
 			for {
 				select {
-				case update := <-client2.Updates:
-					if client2.IsImportUpdate(update.Net) {
+				case update := <-client1.Updates:
+					if client1.IsImportUpdate(update.Net) {
 						received += len(update.Raw.NLRI)
 					}
 					tick = 0
@@ -66,7 +66,7 @@ func advertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 		time.Sleep(time.Second)
 	}
 
-	log.Print("Stop benchmarking - Advertise new routes from client1")
+	log.Print("Stop benchmarking - Advertise new routes from client2")
 
-	return WriteReport("advertise_new_routes.json", reports)
+	return WriteReport("advertise_strong_routes.json", reports)
 }

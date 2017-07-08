@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/codeout/inetb/client"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func withdrawStrongRoutes(client1 *client.Client, client2 *client.Client) error {
+func WithdrawStrongRoutes(client1 *client.Client, client2 *client.Client) error {
 	log.Print("Start benchmarking - Withdraw strong routes from client2")
 
 	if err := client2.RejectExport(); err != nil {

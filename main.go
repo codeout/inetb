@@ -1,43 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/codeout/inetb/client"
-	"io/ioutil"
+	"github.com/codeout/inetb/test"
 	"log"
 	"os"
-	"path"
 	"sync"
 	"time"
 )
-
-type Report struct {
-	Time     string `json:"time"`
-	Sent     int    `json:"sent"`
-	Received int    `json:"received"`
-}
-
-func (r Report) String() string {
-	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
-}
-
-func WriteReport(file string, reports []*Report) error {
-	json, err := json.Marshal(reports)
-	if err != nil {
-		return err
-	}
-
-	dir := "reports"
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.Mkdir(dir, 0755); err != nil {
-			return err
-		}
-	}
-
-	return ioutil.WriteFile(path.Join(dir, file), json, 0644)
-}
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
@@ -80,8 +52,8 @@ func main() {
 	}
 	wg.Wait()
 
-	advertiseNewRoutes(client1, client2)
-	advertiseStrongRoutes(client1, client2)
-	withdrawStrongRoutes(client1, client2)
-	withdrawLastRoutes(client1, client2)
+	test.AdvertiseNewRoutes(client1, client2)
+	test.AdvertiseStrongRoutes(client1, client2)
+	test.WithdrawStrongRoutes(client1, client2)
+	test.WithdrawLastRoutes(client1, client2)
 }

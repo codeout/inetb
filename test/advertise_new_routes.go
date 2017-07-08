@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/codeout/inetb/client"
@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
-func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
-	log.Print("Start benchmarking - Withdraw last routes from client1")
+func AdvertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
+	log.Print("Start benchmarking - Advertise new routes from client1")
 
-	if err := client1.RejectExport(); err != nil {
+	if err := client1.DeprefExport(); err != nil {
+		log.Fatal(err)
+	}
+	if err := client1.AcceptExport(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -24,7 +27,7 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 				select {
 				case update := <-client1.Updates:
 					if client1.IsExportUpdate(update.Net) {
-						sent += len(update.Raw.WithdrawnRoutes)
+						sent += len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:
@@ -38,7 +41,7 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 				select {
 				case update := <-client2.Updates:
 					if client2.IsImportUpdate(update.Net) {
-						received += len(update.Raw.WithdrawnRoutes)
+						received += len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:
@@ -63,7 +66,7 @@ func withdrawLastRoutes(client1 *client.Client, client2 *client.Client) error {
 		time.Sleep(time.Second)
 	}
 
-	log.Print("Stop benchmarking - Withdraw last routes from client1")
+	log.Print("Stop benchmarking - Advertise new routes from client1")
 
-	return WriteReport("withdraw_last_routes.json", reports)
+	return WriteReport("advertise_new_routes.json", reports)
 }
