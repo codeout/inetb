@@ -94,9 +94,20 @@ It will examine 4 test scenarios above and then dump JSON reports in ```report/`
 
 ## Tips
 
-* Disable MRAI
-  * After router(DUT) receives routes and get settled, it may unexpectedly wait for a while until advertises routes to other peers when MRAI is implemented
-  * Try ```out-delay``` option in Juniper or ```advertise-interval``` in Cisco to disable it
+### Disable MRAI
+
+* After router(DUT) receives routes and get settled, it may unexpectedly wait for a while until advertises routes to other peers when MRAI is implemented
+* Try ```out-delay``` option in Juniper or ```advertise-interval``` in Cisco to disable it
+
+### Create Chart
+
+Run
+
+``` shell
+ruby report/make.rb
+```
+
+And open ```report/chart.html```.
 
 
 ## Features to be implemented
