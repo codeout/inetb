@@ -26,7 +26,7 @@ func AdvertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 				select {
 				case update := <-client2.Updates:
 					if client2.IsExportUpdate(update.Net) {
-						advertised += len(update.Raw.NLRI)
+						received += len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:
@@ -40,7 +40,7 @@ func AdvertiseStrongRoutes(client1 *client.Client, client2 *client.Client) error
 				select {
 				case update := <-client1.Updates:
 					if client1.IsImportUpdate(update.Net) {
-						received += len(update.Raw.NLRI)
+						advertised += len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:

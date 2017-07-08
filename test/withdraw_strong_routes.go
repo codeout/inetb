@@ -23,7 +23,7 @@ func WithdrawStrongRoutes(client1 *client.Client, client2 *client.Client) error 
 				select {
 				case update := <-client2.Updates:
 					if client2.IsExportUpdate(update.Net) {
-						advertised += len(update.Raw.WithdrawnRoutes)
+						received += len(update.Raw.WithdrawnRoutes)
 					}
 					tick = 0
 				default:
@@ -37,7 +37,7 @@ func WithdrawStrongRoutes(client1 *client.Client, client2 *client.Client) error 
 				select {
 				case update := <-client1.Updates:
 					if client1.IsImportUpdate(update.Net) {
-						received += len(update.Raw.WithdrawnRoutes)
+						advertised += len(update.Raw.WithdrawnRoutes)
 					}
 					tick = 0
 				default:
