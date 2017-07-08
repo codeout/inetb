@@ -24,7 +24,7 @@ func WriteReport(file string, reports []*Report) error {
 		return err
 	}
 
-	dir := "reports"
+	dir := "report"
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.Mkdir(dir, 0755); err != nil {
 			return err

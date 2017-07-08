@@ -89,7 +89,7 @@ Table dump v2 for full routes is available at [Route Views Project](http://archi
 inetb rib.20170707.1200
 ```
 
-It will examine 4 test scenarios above and then dump JSON reports in ```reports/``` directory.
+It will examine 4 test scenarios above and then dump JSON reports in ```report/``` directory.
 
 
 ## Features to be implemented
