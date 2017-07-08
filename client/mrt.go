@@ -1,6 +1,7 @@
 package client
 
 import (
+	"flag"
 	"fmt"
 	"github.com/osrg/gobgp/packet/mrt"
 	"github.com/osrg/gobgp/table"
@@ -10,8 +11,10 @@ import (
 	"time"
 )
 
+var prefixes = flag.Int("c", -1, "Max prefix count to be injected. -1 means all of the MRT_FILE")
+
 func (c *Client) LoadRoutes(filename string) error {
-	return c.injectMrt(filename, -1, 0, true)
+	return c.injectMrt(filename, *prefixes, 0, true)
 }
 
 func (c *Client) injectMrt(filename string, count int, skip int, onlyBest bool) error {
