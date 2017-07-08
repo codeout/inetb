@@ -17,7 +17,7 @@ func AdvertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 	}
 
 	reports := make([]*Report, 0)
-	sent := 0
+	advertised := 0
 	received := 0
 
 	for tick := 0; tick < *client.Timeout; tick++ {
@@ -26,7 +26,7 @@ func AdvertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 				select {
 				case update := <-client1.Updates:
 					if client1.IsExportUpdate(update.Net) {
-						sent += len(update.Raw.NLRI)
+						advertised += len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:
@@ -50,15 +50,15 @@ func AdvertiseNewRoutes(client1 *client.Client, client2 *client.Client) error {
 		}()
 
 		report := &Report{
-			Time:     time.Now().Format("15:04:05"),
-			Sent:     sent,
-			Received: received,
+			Time:       time.Now().Format("15:04:05"),
+			Advertised: advertised,
+			Received:   received,
 		}
 
 		log.Print(report.String())
 		reports = append(reports, report)
 
-		if sent == 0 && received == 0 {
+		if advertised == 0 && received == 0 {
 			tick = 0
 		}
 

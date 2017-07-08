@@ -9,13 +9,13 @@ import (
 )
 
 type Report struct {
-	Time     string `json:"time"`
-	Sent     int    `json:"sent"`
-	Received int    `json:"received"`
+	Time       string `json:"time"`
+	Advertised int    `json:"advertised"`
+	Received   int    `json:"received"`
 }
 
 func (r Report) String() string {
-	return fmt.Sprintf("%s, Sent: %d, Received: %d", r.Time, r.Sent, r.Received)
+	return fmt.Sprintf("%s, Advertised: %d, Received: %d", r.Time, r.Advertised, r.Received)
 }
 
 func WriteReport(file string, reports []*Report) error {
