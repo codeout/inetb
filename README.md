@@ -92,6 +92,13 @@ inetb rib.20170707.1200
 It will examine 4 test scenarios above and then dump JSON reports in ```report/``` directory.
 
 
+## Tips
+
+* Disable MRAI
+  * After router(DUT) receives routes and get settled, it may unexpectedly wait for a while until advertises routes to other peers when MRAI is implemented
+  * Try ```out-delay``` option in Juniper or ```advertise-interval``` in Cisco to disable it
+
+
 ## Features to be implemented
 
 * FIB convergence benchmark
