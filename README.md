@@ -68,7 +68,7 @@ go get github.com/codeout/inetb
 
 1 . Start 2 gobgpds with different ASNs.
   * See [gobgp document](https://github.com/osrg/gobgp/) for details
-  * Config example is available [here](gobgpd.conf)
+  * Config example is available [here](example/gobgpd.conf)
 
 :warning: NOTE:
 
