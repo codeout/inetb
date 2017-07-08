@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	cli "github.com/osrg/gobgp/client"
 	"github.com/osrg/gobgp/config"
@@ -9,9 +10,12 @@ import (
 	"net"
 )
 
+var Timeout = flag.Int("t", 10, "Timeout in seconds to wait for convergence")
+
 type Client struct {
 	Host          string
 	Port          string
+	Timeout       int
 	GobgpClient   *cli.Client
 	Updates       chan *BGPUpdate
 	neighbor      *config.Neighbor
