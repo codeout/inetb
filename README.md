@@ -104,7 +104,7 @@ It will examine 4 test scenarios above and then dump JSON reports in ```report/`
 Run
 
 ``` shell
-ruby report/make.rb
+ruby $GOPATH/src/github.com/codeout/inetb/report/make.rb report
 ```
 
 And open ```report/chart.html```.

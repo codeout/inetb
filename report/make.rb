@@ -1,14 +1,35 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
+
+
 output = 'chart.html'
 reports = ['advertise_new_routes', 'advertise_strong_routes', 'withdraw_strong_routes', 'withdraw_last_routes']
 
-definition = ''
-reports.each do |name|
-  definition += %(  data['#{name}'] = #{File.read(File.join(__dir__, "#{name}.json")).strip};\n)
+opts = OptionParser.new do |opts|
+  opts.banner = 'chart generator for inetb'
+  opts.define_head 'Usage: make.rb path_to_report_dir'
+
+  opts.on_tail '-h', '--help', 'Show this message' do
+    puts opts
+    exit
+  end
+end
+opts.parse!
+
+unless ARGV[0]
+  puts opts
+  abort
+else
+  report_dir = ARGV[0]
 end
 
-File.write File.join(__dir__, output), DATA.read.sub('__DATA__', definition)
+definition = ''
+reports.each do |name|
+  definition += %(  data['#{name}'] = #{File.read(File.join(report_dir, "#{name}.json")).strip};\n)
+end
+
+File.write File.join(report_dir, output), DATA.read.sub('__DATA__', definition)
 
 
 __END__
