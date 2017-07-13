@@ -34,6 +34,11 @@ File.write File.join(report_dir, output), DATA.read.sub('__DATA__', definition)
 
 __END__
 <html>
+  <head>
+    <style>
+     body { padding: 50px; }
+    </style>
+  </head>
   <body>
     <h2>Test Case 1: Advertise New Prefixes via Peer 1</h2>
     <div id="advertise_new_routes" style="width: 900px; height: 500px"></div>
