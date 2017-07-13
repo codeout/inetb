@@ -53,6 +53,9 @@ func (c *Client) StartReader() error {
 	streamPool := tcpassembly.NewStreamPool(streamFactory)
 	assembler := tcpassembly.NewAssembler(streamPool)
 
+	// NOTE: Give up TCP reassemble in case of packet loss or pcap's packet buffer overflow
+	assembler.MaxBufferedPagesPerConnection = 4
+
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
 		tcpLayer := packet.Layer(layers.LayerTypeTCP)
@@ -130,8 +133,9 @@ func (b *bgpStream) run() {
 	seq := 1
 
 	for scanner.Scan() {
-		msg, _ := bgp.ParseBGPMessage(scanner.Bytes())
-		if msg.Header.Type == bgp.BGP_MSG_UPDATE {
+		if msg, err := bgp.ParseBGPMessage(scanner.Bytes()); err != nil {
+			log.Printf("%s, skip", err)
+		} else if msg.Header.Type == bgp.BGP_MSG_UPDATE {
 			update := msg.Body.(*bgp.BGPUpdate)
 
 			b.updates <- &BGPUpdate{
