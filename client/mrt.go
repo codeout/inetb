@@ -13,8 +13,10 @@ import (
 
 var prefixes = flag.Int("c", -1, "Max prefix count to be injected. -1 means all of the MRT_FILE")
 
-func (c *Client) LoadRoutes(filename string) error {
-	return c.injectMrt(filename, *prefixes, 0, true)
+func (c *Client) LoadRoutes(filename string) {
+	if err := c.injectMrt(filename, *prefixes, 0, true); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (c *Client) injectMrt(filename string, count int, skip int, onlyBest bool) error {
