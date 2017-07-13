@@ -37,7 +37,12 @@ func WithdrawStrongRoutes(client1 *client.Client, client2 *client.Client) error 
 				select {
 				case update := <-client1.Updates:
 					if client1.IsImportUpdate(update.Net) {
-						advertised += len(update.Raw.WithdrawnRoutes)
+						// NOTE: Some implementations advertise NLRI instead of withdrawn routes,
+						//       so count both of them.
+						//       Somehow they advertise NLRI back to the peer which they learned
+						//       the NLRI from, then they will withdraw only when the last route
+						//       disappears from RIB. Otherwise they will advertise NLRI.
+						advertised += len(update.Raw.WithdrawnRoutes) + len(update.Raw.NLRI)
 					}
 					tick = 0
 				default:
