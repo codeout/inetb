@@ -40,16 +40,16 @@ __END__
     </style>
   </head>
   <body>
-    <h2>Test Case 1: Advertise New Prefixes via Peer 1</h2>
+    <h2>Test Case 1: Receive New Prefixes via Peer 1</h2>
     <div id="advertise_new_routes" style="width: 900px; height: 500px"></div>
 
-    <h2>Test Case 2: Advertise Stronger Prefixes via Peer 2</h2>
+    <h2>Test Case 2: Receive Stronger Prefixes via Peer 2</h2>
     <div id="advertise_strong_routes" style="width: 900px; height: 500px"></div>
 
-    <h2>Test Case 3: Withdraw the Stronger Prefixes via Peer 2</h2>
+    <h2>Test Case 3: Receive Withdrawals for the Stronger Prefixes via Peer 2</h2>
     <div id="withdraw_strong_routes" style="width: 900px; height: 500px"></div>
 
-    <h2>Test Case 4: Withdraw the Rest of Prefixes via Peer 1</h2>
+    <h2>Test Case 4: Receive Withdrawals for the Rest of Prefixes via Peer 1</h2>
     <div id="withdraw_last_routes" style="width: 900px; height: 500px"></div>
   </body>
 
