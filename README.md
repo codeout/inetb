@@ -2,16 +2,15 @@
 
 inetb is a benchmarking tool for BGP RIB / FIB convergence
 
-## Demo
+## Output
 
-TBU
-
+<img src="doc/img/result.png" alt="result" width="600">
 
 ## Overview
 
 inetb assumes a test environment below:
 
-TODO: put image
+<img src="doc/img/setup.png" alt="setup" width="400">
 
 * router to be tested(DUT) has 2 eBGP sessions to gobgpds
   * gobgpds are configured with different ASNs
