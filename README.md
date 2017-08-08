@@ -1,5 +1,8 @@
 # inetb
 
+[![Build Status](https://travis-ci.org/codeout/inetb.svg?branch=master)](https://travis-ci.org/codeout/inetb)
+
+
 inetb is a benchmarking tool for BGP RIB / FIB convergence
 
 ## Output
