@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bgp4r'
+require 'json'
 require 'optparse'
 require 'packetfu'
 
@@ -32,87 +33,113 @@ unless ARGV.size >= 1 && neighbors.size >= 2
 end
 
 
-module Bgp
-  MARKER = ["ffffffffffffffffffffffffffffffff"].pack('H*')
+class Parser
+  TIMEOUT = 10
+  SCENARIOS = %w(advertise_new_routes advertise_strong_routes withdraw_strong_routes withdraw_last_routes)
 
-  class UpdateCounter
-    attr_reader :result
+  def initialize(neighbors)
+    @neighbors = neighbors
+    @scenario = 0
+    @result = [{time: nil, received: 0, advertised: 0}]
+  end
 
-    def initialize(neighbors)
-      @neighbors = neighbors
-      @prefixes = Hash.new{|h, k| h[k] = 0 }
-      @result = {}
+  def parse(string)
+    data = _parse(string)
+    return unless data
+
+    @tick ||= data[:time].to_i + 1
+
+    if data[:time] > @tick
+      @result << {time: nil, received: @result.last[:received], advertised: @result.last[:advertised]}
+      @tick += 1
     end
 
-    def read(raw_packet)
-      packet = PacketFu::Packet.parse(raw_packet.data)
-      timestamp = raw_packet.timestamp.sec.to_i
-      payload = packet.payload
+    if data[:time] > @tick + TIMEOUT
+      save
 
-      return unless is_bgp?(payload)
-
-      messages = payload.split(Bgp::MARKER)
-      messages.shift  # BGP payload starts with themarker
-      messages.each do |message|
-        m = BGP::Message.factory(Bgp::MARKER + message)
-        count(m, packet.ip_src_readable, packet.ip_dst_readable, timestamp)
-      end
+      @result = [{time: nil, received: 0, advertised: 0}]
+      @tick = nil
+      @scenario += 1
     end
 
-    def count(message, src, dst, timestamp)
-      return unless is_update?(message)
+    send SCENARIOS[@scenario], data
+  end
 
-      unless @timestamp
-        @timestamp = @start = timestamp
-      end
+  def _parse(string)
+    string =~ /Epoch Time: (\S+) seconds.*Internet Protocol Version ., Src: (\S+), Dst: (\S+)/m
+    data = {time: $1.to_i, src: $2, dst: $3}
+    data[:nlri] = string.scan(/NLRI prefix:/).size
+    data[:withdrawn] = string.scan(/Withdrawn prefix:/).size
 
-      if timestamp > @timestamp
-        @result[timestamp-@start] = @prefixes
+    if data[:nlri] > 0 || data[:withdrawn] > 0
+      data
+    else
+      nil
+    end
+  end
 
-        @prefixes = Hash.new{|h, k| h[k] = 0 }
-        @timestamp = timestamp
-      end
+  def advertise_new_routes(data)
+    @result.last[:time] ||= data[:time].to_i + 1
 
-      key = key(src, dst)
-      count_up key, message.nlri
-      count_up key, message.withdrawn
+    if data[:src] == @neighbors[0]
+      @result.last[:received] += data[:nlri]
+    elsif data[:dst] == @neighbors[1]
+      @result.last[:advertised] += data[:nlri]
+    end
+  end
+
+  def advertise_strong_routes(data)
+    @result.last[:time] ||= data[:time].to_i + 1
+
+    if data[:src] == @neighbors[1]
+      @result.last[:received] += data[:nlri]
+    elsif data[:dst] == @neighbors[0]
+      @result.last[:advertised] += data[:nlri]
+    end
+  end
+
+  def withdraw_strong_routes(data)
+    @result.last[:time] ||= data[:time].to_i + 1
+
+    if data[:src] == @neighbors[1]
+      @result.last[:received] += data[:withdrawn]
+    elsif data[:dst] == @neighbors[0]
+      @result.last[:advertised] += data[:nlri]
+    end
+  end
+
+  def withdraw_last_routes(data)
+    @result.last[:time] ||= data[:time].to_i + 1
+
+    if data[:src] == @neighbors[0]
+      @result.last[:received] += data[:withdrawn]
+    elsif data[:dst] == @neighbors[1]
+      @result.last[:advertised] += data[:withdrawn]
+    end
+  end
+
+  def save
+    @result.reject! {|i| i[:time].nil? }
+    @result.each do |i|
+      i[:time] = Time.at(i[:time]).strftime('%T')
     end
 
+    Dir.mkdir('report') unless File.directory?('report')
 
-    private
+    file = "report/#{SCENARIOS[@scenario]}.json"
+    puts %(writing to "#{file}")
 
-    def is_bgp?(payload)
-      payload.size >= 16 && !payload.start_with?(Bgp::MARKER)
-    end
-
-    def is_update?(message)
-      message.class == BGP::Update
-    end
-
-    def key(src, dst)
-      if @neighbors.include?(src)
-        "#{dst} <- #{src}"
-      else
-        "#{src} -> #{dst}"
-      end
-    end
-
-    def count_up(key, field)
-      return unless field
-      @prefixes[key] += field.nlris.size
+    open(file, 'w') do |f|
+      f.write JSON.dump(@result)
     end
   end
 end
 
 
-counter = Bgp::UpdateCounter.new(neighbors)
-
-PacketFu::PcapPackets.new.read(File.read(ARGV[0])).each do |packet|
-  begin
-    counter.read(packet)
-  rescue
-    $stderr.puts $!
+parser = Parser.new(neighbors)
+IO.popen("tshark -Vr #{ARGV.first}") do |io|
+  while lines = io.gets("\n\n")
+    parser.parse lines
   end
+  parser.save
 end
-
-p counter.result
